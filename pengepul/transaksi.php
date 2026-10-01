@@ -43,6 +43,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $pdo->prepare("INSERT INTO transaksi (id_user, id_sampah, tipe, berat_kg, total_rp, status, tanggal) VALUES (?, ?, 'jual_pengepul', ?, ?, 'disetujui', NOW())")
                         ->execute([$myId, $idSampah, $berat, $totalHarga]);
                     $pdo->prepare("UPDATE users SET saldo = saldo - ? WHERE id_user = ?")->execute([$totalHarga, $myId]);
+                    // Saldo admin bertambah (pengepul membayar ke admin)
+                    $pdo->prepare("UPDATE users SET saldo = saldo + ? WHERE id_user = ?")->execute([$totalHarga, adminId($pdo)]);
                     $pdo->prepare("UPDATE sampah SET stok_kg = stok_kg - ? WHERE id_sampah = ?")->execute([$berat, $idSampah]);
 
                     $pdo->commit();

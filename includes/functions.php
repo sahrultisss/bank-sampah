@@ -52,3 +52,9 @@ function labelRole(string $role): string
     $map = ['admin' => 'Admin', 'guru' => 'Guru', 'siswa' => 'Siswa', 'pengepul' => 'Pengepul'];
     return $map[$role] ?? ucfirst($role);
 }
+
+/** ID akun admin utama (pemilik saldo kas bank sampah) */
+function adminId(PDO $pdo): int
+{
+    return (int)$pdo->query("SELECT id_user FROM users WHERE role = 'admin' ORDER BY id_user ASC LIMIT 1")->fetchColumn();
+}

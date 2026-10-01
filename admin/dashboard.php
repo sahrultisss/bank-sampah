@@ -5,6 +5,23 @@ require_once __DIR__ . '/../includes/auth.php';
 requireRole('admin');
 
 $pdo = getConnection();
+$adminId = adminId($pdo);
+
+// Tambah modal saldo admin (untuk membayar setoran guru/siswa)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'tambah_modal') {
+    $nominal = (float)($_POST['nominal'] ?? 0);
+    if ($nominal <= 0) {
+        setFlash('error', 'Nominal modal harus lebih dari 0.');
+    } else {
+        $pdo->prepare('UPDATE users SET saldo = saldo + ? WHERE id_user = ?')->execute([$nominal, $adminId]);
+        setFlash('success', 'Saldo admin bertambah ' . rupiah($nominal) . '.');
+    }
+    redirect('admin/dashboard.php');
+}
+
+$stmt = $pdo->prepare('SELECT saldo FROM users WHERE id_user = ?');
+$stmt->execute([$adminId]);
+$saldoAdmin = $stmt->fetch()['saldo'];
 
 $totalAnggota = $pdo->query("SELECT COUNT(*) c FROM users WHERE role IN ('guru','siswa')")->fetch()['c'];
 $totalSaldo   = $pdo->query("SELECT COALESCE(SUM(saldo),0) s FROM users WHERE role IN ('guru','siswa')")->fetch()['s'];
@@ -51,6 +68,10 @@ require_once __DIR__ . '/../includes/header.php';
 </div>
 
 <div class="stat-row">
+    <div class="stat stamp-accent">
+        <div class="stat-label">Saldo Admin (Kas)</div>
+        <div class="stat-value"><?= rupiah($saldoAdmin) ?></div>
+    </div>
     <div class="stat">
         <div class="stat-label">Total Guru &amp; Siswa</div>
         <div class="stat-value"><?= number_format($totalAnggota) ?></div>
@@ -87,6 +108,19 @@ require_once __DIR__ . '/../includes/header.php';
         <a href="<?= baseUrl('admin/topup.php') ?>">Lihat &rarr;</a>
     </div>
 <?php endif; ?>
+
+<div class="panel">
+    <div class="panel-head"><h2 class="mt-0">Tambah Modal Saldo Admin</h2></div>
+    <p class="text-soft" style="margin-top:0;">Saldo admin dipakai untuk membayar setoran guru/siswa, dan bertambah saat pengepul membeli sampah.</p>
+    <form method="POST" style="display:flex; gap:12px; align-items:end; flex-wrap:wrap;">
+        <input type="hidden" name="action" value="tambah_modal">
+        <div class="field" style="margin-bottom:0; min-width:220px;">
+            <label>Nominal (Rp)</label>
+            <input type="number" name="nominal" step="1000" min="1000" required placeholder="Contoh: 100000">
+        </div>
+        <button type="submit" class="btn sage">Tambah Saldo</button>
+    </form>
+</div>
 
 <div class="panel">
     <div class="panel-head">

@@ -27,11 +27,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->execute([$idTrx]);
                 $trx = $stmt->fetch();
 
-                $pdo->prepare("UPDATE users SET saldo = saldo + ? WHERE id_user = ?")->execute([$trx['total_rp'], $trx['id_user']]);
-                $pdo->prepare("UPDATE sampah SET stok_kg = stok_kg + ? WHERE id_sampah = ?")->execute([$trx['berat_kg'], $trx['id_sampah']]);
+                // Admin membayar setoran dari saldo adminnya (cek & potong dalam satu query)
+                $bayar = $pdo->prepare("UPDATE users SET saldo = saldo - ? WHERE id_user = ? AND saldo >= ?");
+                $bayar->execute([$trx['total_rp'], adminId($pdo), $trx['total_rp']]);
 
-                $pdo->commit();
-                setFlash('success', 'Setoran user berhasil di-ACC!');
+                if ($bayar->rowCount() !== 1) {
+                    $pdo->rollBack();
+                    setFlash('error', 'Saldo admin tidak cukup untuk membayar setoran ini (' . rupiah($trx['total_rp']) . '). Tambah modal saldo di Dashboard.');
+                } else {
+                    $pdo->prepare("UPDATE users SET saldo = saldo + ? WHERE id_user = ?")->execute([$trx['total_rp'], $trx['id_user']]);
+                    $pdo->prepare("UPDATE sampah SET stok_kg = stok_kg + ? WHERE id_sampah = ?")->execute([$trx['berat_kg'], $trx['id_sampah']]);
+
+                    $pdo->commit();
+                    setFlash('success', 'Setoran user berhasil di-ACC!');
+                }
             }
             redirect('admin/transaksi.php');
         } catch (Exception $e) {
@@ -64,14 +73,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $total = $berat * $sampah['harga_per_kg'];
                 $pdo->beginTransaction();
                 try {
-                    $pdo->prepare("INSERT INTO transaksi (id_user, id_sampah, tipe, berat_kg, total_rp, status, tanggal) VALUES (?, ?, 'beli_user', ?, ?, 'disetujui', NOW())")
-                        ->execute([$idUser, $idSampah, $berat, $total]);
-                    $pdo->prepare("UPDATE users SET saldo = saldo + ? WHERE id_user = ?")->execute([$total, $idUser]);
-                    $pdo->prepare("UPDATE sampah SET stok_kg = stok_kg + ? WHERE id_sampah = ?")->execute([$berat, $idSampah]);
+                    // Admin membayar dari saldo adminnya
+                    $bayar = $pdo->prepare("UPDATE users SET saldo = saldo - ? WHERE id_user = ? AND saldo >= ?");
+                    $bayar->execute([$total, adminId($pdo), $total]);
 
-                    $pdo->commit();
-                    setFlash('success', 'Berhasil membeli sampah dari user sebesar ' . rupiah($total));
-                    redirect('admin/transaksi.php');
+                    if ($bayar->rowCount() !== 1) {
+                        $pdo->rollBack();
+                        $error = 'Saldo admin tidak cukup (butuh ' . rupiah($total) . '). Tambah modal saldo di Dashboard.';
+                    } else {
+                        $pdo->prepare("INSERT INTO transaksi (id_user, id_sampah, tipe, berat_kg, total_rp, status, tanggal) VALUES (?, ?, 'beli_user', ?, ?, 'disetujui', NOW())")
+                            ->execute([$idUser, $idSampah, $berat, $total]);
+                        $pdo->prepare("UPDATE users SET saldo = saldo + ? WHERE id_user = ?")->execute([$total, $idUser]);
+                        $pdo->prepare("UPDATE sampah SET stok_kg = stok_kg + ? WHERE id_sampah = ?")->execute([$berat, $idSampah]);
+
+                        $pdo->commit();
+                        setFlash('success', 'Berhasil membeli sampah dari user sebesar ' . rupiah($total));
+                        redirect('admin/transaksi.php');
+                    }
                 } catch (Exception $e) {
                     if ($pdo->inTransaction()) $pdo->rollBack();
                     $error = 'Gagal memproses transaksi.';
@@ -92,6 +110,10 @@ $transaksiList = $pdo->query("
     ORDER BY (t.status = 'pending') DESC, t.tanggal DESC
 ")->fetchAll();
 
+$stmt = $pdo->prepare('SELECT saldo FROM users WHERE id_user = ?');
+$stmt->execute([adminId($pdo)]);
+$saldoAdmin = $stmt->fetch()['saldo'];
+
 $pageTitle = 'Kelola Transaksi';
 $active = 'transaksi';
 require_once __DIR__ . '/../includes/header.php';
@@ -108,6 +130,7 @@ require_once __DIR__ . '/../includes/header.php';
 
 <div class="panel" style="max-width:520px;">
     <h3>Input Pembelian Sampah dari User</h3>
+    <p class="field-hint" style="margin-top:0;">Saldo Admin: <strong><?= rupiah($saldoAdmin) ?></strong></p>
     <form method="POST">
         <div class="field">
             <label>User (Guru / Siswa)</label>

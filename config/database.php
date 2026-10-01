@@ -12,10 +12,22 @@
 
 date_default_timezone_set('Asia/Jakarta');
 
-define('DB_HOST', 'sql112.infinityfree.com');
-define('DB_NAME', 'if0_43056269_bank_sampah');
-define('DB_USER', 'if0_43056269');
-define('DB_PASS', 'pjp0fKQPgpnN');
+// Deteksi otomatis: localhost = XAMPP, selain itu = hosting
+$host = preg_replace('/:\d+$/', '', $_SERVER['HTTP_HOST'] ?? 'localhost');
+
+if (in_array($host, ['localhost', '127.0.0.1'], true)) {
+    // LOKAL (XAMPP)
+    define('DB_HOST', 'localhost');
+    define('DB_NAME', 'bank_sampah');
+    define('DB_USER', 'root');
+    define('DB_PASS', '');
+} else {
+    // HOSTING (InfinityFree)
+    define('DB_HOST', 'sql112.infinityfree.com');
+    define('DB_NAME', 'if0_43056269_bank_sampah');
+    define('DB_USER', 'if0_43056269');
+    define('DB_PASS', 'pjp0fKQPgpnN');
+}
 
 function getConnection(): PDO
 {
