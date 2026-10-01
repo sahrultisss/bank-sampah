@@ -1,0 +1,402 @@
+/* =========================================================
+   Bank Sampah — Design tokens
+   Konsep: "buku tabungan" (passbook ledger) di atas kertas kraft.
+   Bukan tema hijau-SaaS generik — nuansa kertas, tinta, & cap stempel.
+========================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+:root {
+    --paper:       #EAE2CC;
+    --paper-light: #F6F1E4;
+    --card:        #FBF8EF;
+    --ink:         #22362F;
+    --ink-soft:    #4B5D53;
+    --line:        #C9BE9E;
+    --stamp:       #A6432E;
+    --stamp-dark:  #7E3120;
+    --sage:        #7C8C5C;
+    --gold:        #B6892E;
+
+    --font-display: 'Fraunces', serif;
+    --font-body:    'IBM Plex Sans', sans-serif;
+    --font-mono:    'IBM Plex Mono', monospace;
+
+    --radius: 3px;
+    --shadow-paper: 0 1px 0 rgba(34,54,47,0.06), 0 8px 20px -12px rgba(34,54,47,0.25);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.55;
+}
+
+a { color: var(--stamp-dark); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    color: var(--ink);
+    font-weight: 600;
+    margin: 0 0 .4em;
+    letter-spacing: -0.01em;
+}
+h1 { font-size: 1.9rem; }
+h2 { font-size: 1.4rem; }
+h3 { font-size: 1.1rem; }
+
+p { max-width: 68ch; }
+
+code, .mono { font-family: var(--font-mono); }
+
+/* =========================================================
+   Paper texture background (halaman luar / login)
+========================================================= */
+.paper-bg {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 16px;
+    background:
+        repeating-linear-gradient(0deg, rgba(34,54,47,0.025) 0px, rgba(34,54,47,0.025) 1px, transparent 1px, transparent 28px),
+        var(--paper);
+}
+
+/* =========================================================
+   Kartu login — dibingkai seperti sampul buku tabungan
+========================================================= */
+.passbook {
+    width: 100%;
+    max-width: 400px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-paper);
+    padding: 40px 36px 32px;
+    position: relative;
+}
+.passbook::before {
+    content: '';
+    position: absolute;
+    inset: 8px;
+    border: 1px dashed var(--line);
+    border-radius: 2px;
+    pointer-events: none;
+}
+.passbook-stamp {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 18px;
+    border: 2px solid var(--stamp);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: rotate(-6deg);
+    color: var(--stamp);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.6rem;
+}
+.passbook h1 {
+    text-align: center;
+    font-size: 1.5rem;
+    margin-bottom: 2px;
+}
+.passbook .subtitle {
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: .85rem;
+    margin-bottom: 28px;
+}
+
+/* =========================================================
+   Form — gaya "isi formulir di atas kertas" (garis bawah, bukan kotak)
+========================================================= */
+.field { margin-bottom: 20px; }
+.field label {
+    display: block;
+    font-size: .78rem;
+    color: var(--ink-soft);
+    margin-bottom: 6px;
+}
+.field input,
+.field select,
+.field textarea {
+    width: 100%;
+    border: none;
+    border-bottom: 1.5px solid var(--line);
+    background: transparent;
+    padding: 8px 2px;
+    font-family: var(--font-body);
+    font-size: .95rem;
+    color: var(--ink);
+    transition: border-color .15s ease;
+}
+.field textarea { border: 1px solid var(--line); border-radius: var(--radius); padding: 8px; }
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+    outline: none;
+    border-color: var(--stamp);
+}
+.field-hint { font-size: .75rem; color: var(--ink-soft); margin-top: 4px; }
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0 24px;
+}
+.form-grid .field.full { grid-column: 1 / -1; }
+@media (max-width: 640px) { .form-grid { grid-template-columns: 1fr; } }
+
+/* =========================================================
+   Tombol
+========================================================= */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border: 1.5px solid var(--ink);
+    background: var(--ink);
+    color: var(--paper-light);
+    font-family: var(--font-body);
+    font-size: .88rem;
+    font-weight: 500;
+    padding: 10px 20px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: transform .1s ease, opacity .15s ease;
+}
+.btn:hover { opacity: .85; text-decoration: none; }
+.btn:active { transform: translateY(1px); }
+.btn.block { width: 100%; }
+.btn.stamp { background: var(--stamp); border-color: var(--stamp); }
+.btn.outline { background: transparent; color: var(--ink); }
+.btn.sage { background: var(--sage); border-color: var(--sage); }
+.btn.small { padding: 6px 12px; font-size: .78rem; }
+.btn.danger { background: var(--stamp-dark); border-color: var(--stamp-dark); }
+
+/* =========================================================
+   Layout aplikasi (sidebar + konten)
+========================================================= */
+.app {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    min-height: 100vh;
+}
+@media (max-width: 860px) {
+    .app { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+}
+
+.sidebar {
+    background: var(--ink);
+    color: var(--paper-light);
+    padding: 26px 18px;
+    display: flex;
+    flex-direction: column;
+}
+.sidebar .brand {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 4px;
+}
+.sidebar .brand-sub {
+    font-size: .72rem;
+    color: #9DAE9F;
+    margin-bottom: 30px;
+}
+.sidebar nav { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+.sidebar nav a {
+    color: #D7DFCF;
+    padding: 10px 12px;
+    border-radius: var(--radius);
+    font-size: .88rem;
+    border-left: 2px solid transparent;
+}
+.sidebar nav a:hover { background: rgba(255,255,255,0.06); text-decoration: none; }
+.sidebar nav a.active {
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+    border-left: 2px solid var(--gold);
+}
+.sidebar .user-box {
+    border-top: 1px solid rgba(255,255,255,0.12);
+    padding-top: 14px;
+    margin-top: 14px;
+    font-size: .82rem;
+}
+.sidebar .user-box .name { color: #fff; font-weight: 500; }
+.sidebar .user-box .role { color: #9DAE9F; text-transform: capitalize; }
+.sidebar .user-box a { display: inline-block; margin-top: 8px; font-size: .78rem; color: var(--stamp); }
+
+.content { 
+    padding: 30px 36px; 
+    width: 100%;
+    max-width: none; /* atau hapus properti max-width */
+}
+.topbar {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.topbar .eyebrow { color: var(--ink-soft); font-size: .82rem; }
+
+/* =========================================================
+   Kartu ringkasan (statistik) — gaya cap/label, bukan card SaaS biasa
+========================================================= */
+.stat-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+}
+.stat {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+}
+.stat .stat-label { font-size: .78rem; color: var(--ink-soft); margin-bottom: 6px; }
+.stat .stat-value {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-weight: 600;
+}
+.stat.stamp-accent .stat-value { color: var(--stamp-dark); }
+.stat.sage-accent .stat-value { color: var(--sage); }
+
+/* =========================================================
+   Panel / card konten
+========================================================= */
+.panel {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 22px 24px;
+    margin-bottom: 24px;
+}
+.panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+/* =========================================================
+   Tabel — gaya ledger (garis horizontal, tanpa grid berat)
+========================================================= */
+table.ledger {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .9rem;
+}
+table.ledger th {
+    text-align: left;
+    font-weight: 500;
+    color: var(--ink-soft);
+    font-size: .78rem;
+    padding: 8px 10px;
+    border-bottom: 2px solid var(--ink);
+}
+table.ledger td {
+    padding: 11px 10px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: middle;
+}
+table.ledger tbody tr:hover { background: rgba(34,54,47,0.03); }
+table.ledger .num { font-family: var(--font-mono); text-align: right; }
+table.ledger .actions { text-align: right; white-space: nowrap; }
+
+/* =========================================================
+   Badge status (gaya cap stempel kecil)
+========================================================= */
+.badge {
+    display: inline-block;
+    font-size: .72rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    border: 1px solid currentColor;
+    font-weight: 500;
+}
+.badge.setor  { color: var(--sage); }
+.badge.tarik  { color: var(--stamp-dark); }
+.badge.aktif  { color: var(--sage); }
+.badge.nonaktif { color: #9a1f1f; }
+.badge.pending   { color: var(--gold); }
+.badge.disetujui { color: var(--sage); }
+.badge.ditolak   { color: #9a1f1f; }
+
+/* =========================================================
+   Alert / flash message
+========================================================= */
+.alert {
+    padding: 12px 16px;
+    border-radius: var(--radius);
+    margin-bottom: 20px;
+    font-size: .88rem;
+    border-left: 3px solid;
+}
+.alert.success { background: #EEF1E4; border-color: var(--sage); color: #3E4A2C; }
+.alert.error   { background: #F5E7E2; border-color: var(--stamp); color: var(--stamp-dark); }
+.alert.info    { background: #EAEEF3; border-color: #5B7A94; color: #2E4256; }
+
+/* =========================================================
+   Modal ringkas (dipakai untuk konfirmasi hapus, dll)
+========================================================= */
+.modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(34,54,47,0.45);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+}
+.modal-overlay.open { display: flex; }
+.modal-box {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 24px;
+    width: 100%;
+    max-width: 380px;
+    border: 1px solid var(--line);
+}
+.modal-box .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+
+/* =========================================================
+   Grafik / laporan
+========================================================= */
+.chart-box { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; }
+
+/* =========================================================
+   Cetak (window.print -> "Save as PDF")
+========================================================= */
+@media print {
+    .no-print { display: none !important; }
+    .app { display: block; }
+    .content { padding: 0; max-width: 100%; }
+    body { background: #fff; }
+    .panel, .card { border: none; box-shadow: none; }
+}
+
+/* Utility */
+.text-soft { color: var(--ink-soft); }
+.mt-0 { margin-top: 0; }
+.flex-between { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
